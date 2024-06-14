@@ -29,6 +29,17 @@ public class ProductController {
         return productService.updateProduct(id, requestDto);
     }
 
+    @PostMapping("products/{productId}/folder")
+    public void addFolder(
+            @PathVariable Long productId,
+            @RequestParam Long folderId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        productService.addFolder(productId, folderId, userDetails.getUser());
+    }
+
+
+
     // 관심 상품 조회하기
     @GetMapping("/products")
     public Page<ProductResponseDto> getProducts(
@@ -40,4 +51,6 @@ public class ProductController {
         // 응답 보내기
         return productService.getProducts(userDetails.getUser(),  page-1, size, sortBy, isAsc);
     }
+
+
 }

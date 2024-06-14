@@ -47,20 +47,27 @@ public class ProductService {
         return new ProductResponseDto(product);
     }
 
-    public Page<ProductResponseDto> getProducts(User user, int page, int size, String sortBy, boolean isAsc) {
+
+    @Transactional(readOnly = true)
+    public Page<ProductResponseDto> getProducts(User user,
+                                                int page, int size, String sortBy, boolean isAsc) {
+        // 페이징 처리
         Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
         Sort sort = Sort.by(direction, sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
 
+        // 사용자 권한 가져와서 ADMIN 이면 전체 조회, USER 면 본인이 추가한 부분 조회
         UserRoleEnum userRoleEnum = user.getRole();
 
         Page<Product> productList;
 
         if (userRoleEnum == UserRoleEnum.USER) {
-            productList = productRepository.findAllByUser(user, pageable); // 일반 계정
+            // 사용자 권한이 USER 일 경우
+            productList = productRepository.findAllByUser(user, pageable);
         } else {
-            productList = productRepository.findAll(pageable); // ADMIN 계정
+            productList = productRepository.findAll(pageable);
         }
+
         return productList.map(ProductResponseDto::new);
     }
 
